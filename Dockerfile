@@ -1,6 +1,11 @@
-FROM node:18-slim
-WORKDIR /app
-RUN npm install proxy-chain
-# Порт на Render по умолчанию может быть любым, но мы зафиксируем 10000
-EXPOSE 10000
-CMD ["node", "-e", "const ProxyChain = require('proxy-chain'); const server = new ProxyChain.Server({ port: 10000, prepareRequestFunction: ({ username, password }) => { return { requestAuthentication: username !== 'user' || password !== 'mypassword123' }; } }); server.listen(() => { console.log('Proxy running on port 10000'); });"]
+FROM alpine:latest
+RUN apk add --no-cache shadowsocks-libev
+# Запускаем Shadowsocks на порту 10000
+# Пароль: mypassword123, Шифрование: chacha20-ietf-poly1305
+CMD exec ss-server \
+      -s 0.0.0.0 \
+      -p 10000 \
+      -k mypassword123 \
+      -m chacha20-ietf-poly1305 \
+      --reuse-port \
+      -u
