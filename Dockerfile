@@ -1,11 +1,21 @@
 FROM alpine:latest
-RUN apk add --no-cache shadowsocks-libev
-# Запускаем Shadowsocks на порту 10000
-# Пароль: mypassword123, Шифрование: chacha20-ietf-poly1305
-CMD exec ss-server \
-      -s 0.0.0.0 \
-      -p 10000 \
-      -k mypassword123 \
-      -m chacha20-ietf-poly1305 \
-      --reuse-port \
-      -u
+
+# Обновляем репозитории и устанавливаем shadowsocks-libev из веточки community
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
+    shadowsocks-libev \
+    libmgrs
+
+# Переменные среды
+ENV SS_PASSWORD=mypassword123
+ENV SS_METHOD=chacha20-ietf-poly1305
+ENV PORT=10000
+
+# Запускаем сервер
+# Мы используем ss-server (часть пакета shadowsocks-libev)
+CMD ss-server \
+    -s 0.0.0.0 \
+    -p $PORT \
+    -k $SS_PASSWORD \
+    -m $SS_METHOD \
+    --reuse-port \
+    -u
